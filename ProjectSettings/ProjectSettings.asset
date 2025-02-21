@@ -8,7 +8,7 @@ PlayerSettings:
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
-  defaultScreenOrientation: 4
+  defaultScreenOrientation: 3
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
@@ -144,9 +144,12 @@ PlayerSettings:
   preloadedAssets:
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   - {fileID: 11400000, guid: 061302d2d18256d4f8ac6d46d3a531a6, type: 2}
+  - {fileID: 11400000, guid: 5c21c3535df081b4aa76045b66733d1b, type: 2}
+  - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   - {fileID: 11400000, guid: 36a3adc16a74fa64595161bc2a491731, type: 2}
-  - {fileID: -7388242948455139263, guid: 4c32610fb845ed04f950319f5a6bca0b, type: 2}
-  - {fileID: -3477006729852630345, guid: b6b21887169d00644af02d2295937337, type: 2}
+  - {fileID: 1790652606373165925, guid: 4c32610fb845ed04f950319f5a6bca0b, type: 2}
+  - {fileID: 11400000, guid: 316fb56941e82f244bde516a444083b2, type: 2}
+  - {fileID: -5898324827312256609, guid: b6b21887169d00644af02d2295937337, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -897,7 +900,9 @@ PlayerSettings:
   metroSplashScreenUseBackgroundColor: 0
   syncCapabilities: 0
   platformCapabilities: {}
-  metroTargetDeviceFamilies: {}
+  metroTargetDeviceFamilies:
+    Desktop: True
+    Mobile: True
   metroFTAName: 
   metroFTAFileTypes: []
   metroProtocolName: 

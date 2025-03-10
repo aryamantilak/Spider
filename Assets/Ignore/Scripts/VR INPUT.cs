@@ -13,10 +13,9 @@ public class VRINPUT : MonoBehaviour
     int y = 0;
     private void Start()
     {
-        // Create an instance of the InputSimulator
-        bob.Mouse.LeftButtonClick();
+        bob.KeyPress(VirtualKeyCode.SPACE);
     }
-    //Swinging
+    #region Swinging
     public void LeftMouseDown()
     {
         bob.Mouse.LeftButtonDown();
@@ -33,7 +32,8 @@ public class VRINPUT : MonoBehaviour
     {
         bob.Mouse.RightButtonUp();
     }
-    //Grappling
+    #endregion
+    #region Grappling
     public void PrimaryGrapple()
     {
         bob.KeyDown(VirtualKeyCode.SHIFT);
@@ -54,8 +54,8 @@ public class VRINPUT : MonoBehaviour
         bob.KeyUp(VirtualKeyCode.SHIFT);
         bob.Mouse.LeftButtonUp();
     }
-
-    //Movement
+    #endregion
+    #region Movement
     public void MoveForward()
     {
         bob.KeyPress(VirtualKeyCode.VK_W);
@@ -76,8 +76,8 @@ public class VRINPUT : MonoBehaviour
     {
         bob.KeyPress(VirtualKeyCode.SPACE);
     }
-
-    //Mouse
+    #endregion
+    #region Camera Orientation
     public void MouseUp()
     {
         bob.Mouse.MoveMouseTo(x, y-=1000);
@@ -94,7 +94,6 @@ public class VRINPUT : MonoBehaviour
     {
         bob.Mouse.MoveMouseTo(x+=1000, y);
     }
-
+    #endregion
 }
- 
- 
+

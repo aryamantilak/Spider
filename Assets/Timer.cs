@@ -5,6 +5,7 @@ using TMPro;
 
 public class Timer : MonoBehaviour
 {
+    public Rings ring;
     [SerializeField] TextMeshProUGUI timerText;
     [SerializeField] float remainingTime;
 
@@ -14,15 +15,21 @@ public class Timer : MonoBehaviour
         if (remainingTime > 0)
         {
             remainingTime -= Time.deltaTime;
+            int minutes = Mathf.FloorToInt(remainingTime / 60);
+            int seconds = Mathf.FloorToInt(remainingTime % 60);
+            timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
         }
         else if (remainingTime < 0)
-        {
-            remainingTime = 0;
-            //GameOver();
-            timerText.color = Color.red;
-        }
-        int minutes = Mathf.FloorToInt(remainingTime / 60);
-        int seconds = Mathf.FloorToInt(remainingTime % 60);
-        timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+                {
+                    remainingTime = 0;
+                    GameOver();
+                }
+    }
+
+    private void GameOver()
+    {
+        timerText.color = Color.red;
+        ring.over();
+        timerText.text = string.Format("Your score is: " + spawner.score + "!");
     }
 }

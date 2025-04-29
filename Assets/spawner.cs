@@ -9,7 +9,7 @@ public class spawner : MonoBehaviour
     private float spawnRange2 = 1000;
     public float spawnCap;
     private static float spawned = 1;
-    private static float score = 0;
+    public static float score = 0;
     public GameObject og;
     public GameObject timer;
 

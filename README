@@ -1,7 +1,205 @@
-This project is a non-commercial, free-to-play fan project created strictly for educational, learning, and portfolio purposes. 
-The swinging mechanics are inspired by the Marvel universe. All rights to the original characters, names, and trademarked concepts belong to their respective owners. 
-No copyright infringement is intended.
+# Spider
 
-The project was made using Unity and was intended for an Oculus Quest 2
+A Unity VR traversal project built around dual-hook swinging, grappling, and a timed ring-collection challenge.
+Designed with the Oculus Quest 2 in mind, Spider explores how physics-based movement can make navigating a city
+environment part of the game itself.
 
-Trigger for swinging and Secondary Trigger for Grapple
+This is a non-commercial educational and portfolio fan project. See the rights notice at the end.
+
+## Gameplay
+
+Aim at a grappleable surface, attach a hook, and use momentum to move through the environment. Two independent
+hook slots let the player attach to different points. Grappling launches the player toward a selected target,
+while swinging maintains a spring connection that can be shortened or extended.
+
+The project also includes a ring challenge: rings spawn at randomized positions, collecting a ring increases
+the score, and a countdown displays the score when time runs out. Spawn limits and timer duration are configured
+through scene components.
+
+### Implemented systems
+
+- **Dual-hook swinging:** spring joints attach the player to environmental anchor points.
+- **Target prediction:** raycasts and sphere casts find potential attachment points and position aim indicators.
+- **Grapple traversal:** a calculated launch velocity moves the player along an arc toward a target.
+- **Cable control and thrust:** shorten or extend the connection and apply directional forces while swinging.
+- **Movement states:** walking, airborne movement, swinging, grappling, and temporary freezing.
+- **Traversal feedback:** rendered hook lines, movement/speed text, and grapple-related camera field-of-view changes.
+- **Ring collection:** randomized ring spawning, score tracking, and a countdown.
+- **Environment helpers:** moving-platform parenting and NavMesh-based NPC path following.
+
+These systems are present in the source. Actual behavior depends on the components and references assigned in
+the scene; the repository also contains experimental and alternative movement scripts.
+
+## Technology
+
+Versions below come from the committed project files, rather than a claim of compatibility with newer releases.
+
+| Component | Version |
+| --- | --- |
+| Unity Editor | 6000.0.25f1 (Unity 6) |
+| Universal Render Pipeline | 17.0.3 |
+| Meta XR All-in-One SDK | 71.0.0 |
+| XR Interaction Toolkit | 3.0.7 |
+| Unity Input System | 1.11.2 |
+| OpenXR Plugin | 1.13.2 |
+| Oculus XR Plugin | 4.3.0 |
+| Meta OpenXR | 2.0.1 |
+| H.InputSimulator | 1.5.0 |
+
+Unity dependencies are listed in [Packages/manifest.json](Packages/manifest.json).
+The Windows input-simulation dependency is recorded in [Assets/packages.config](Assets/packages.config).
+
+## Getting started
+
+### Requirements
+
+- Git and Unity Hub.
+- Unity Editor **6000.0.25f1**.
+- A Windows development machine for the existing Windows input-simulation bridge.
+- A compatible headset/controller setup for VR testing; the original intended device is Oculus Quest 2.
+
+The repository contains substantial environment and imported asset content. Allow time and disk space for
+cloning and the initial Unity import.
+
+### Open the project
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/aryamantilak/Spider.git
+   ```
+
+2. In Unity Hub, add the cloned **Spider** directory, which contains `Assets/`, `Packages/`, and
+   `ProjectSettings/`.
+3. Open it with Unity **6000.0.25f1** and allow package resolution and asset import to finish.
+4. Check the Console for missing packages, script errors, or unassigned references.
+5. Open [Assets/DualSwinging.unity](Assets/DualSwinging.unity), then enter Play mode with your input/headset setup.
+
+`DualSwinging.unity` is the enabled scene in the committed build settings.
+`Assets/Scenes/Main Menu.unity` also exists, but is not enabled in those settings.
+
+### VR and build configuration
+
+The original control description is **trigger for swinging, secondary trigger for grapple**. Controller events
+must be connected to the corresponding scene callbacks; the scripts alone do not establish every physical
+controller binding.
+
+The current `VRINPUT` bridge translates callbacks into Windows keyboard and mouse events using
+`H.InputSimulator`. The movement code also reads legacy `UnityEngine.Input` APIs. Having XR packages installed
+does not, by itself, make this a verified standalone Quest application.
+
+For PC-connected testing, check the active XR loader, headset connection, input bindings, and Game view focus.
+For a standalone Android/Quest build, install Android Build Support for this Unity version, review the Android
+XR configuration in Build Profiles/Project Settings, and replace or conditionally exclude the Windows-specific
+input bridge. A successful native Quest build is not established by this documentation.
+
+## Controls
+
+### Intended VR controls
+
+| Action | Original control description |
+| --- | --- |
+| Swing | Trigger |
+| Grapple | Secondary trigger |
+
+Left/right behavior depends on the scene's event wiring to the `VRINPUT` callbacks.
+
+### Keyboard and mouse controls
+
+These are the defaults in `DualHooks.cs` and `PlayerMovementDualSwinging.cs`; serialized Inspector values may
+override them.
+
+| Input | Action |
+| --- | --- |
+| Hold left mouse button | First swing hook |
+| Hold right mouse button | Second swing hook |
+| Release the corresponding mouse button | Release that swing hook |
+| Left Shift + left/right mouse click | Grapple using the corresponding hook slot |
+| Horizontal/Vertical axes (typically WASD) | Ground/air movement |
+| Space while grounded | Jump |
+| A / D while swinging | Apply sideways thrust |
+| W while swinging | Apply forward thrust |
+| Space while swinging | Pull toward the anchor and shorten the cable |
+| S while swinging | Extend the cable |
+
+Aim at a surface included in the hook component's `whatIsGrappleable` layer mask. The target indicator must
+find a valid surface before a swing can begin.
+
+## How the traversal works
+
+1. **Find a target.** `DualHooks` checks camera raycasts and per-hook sphere casts. A direct raycast hit takes
+   priority over the predicted sphere-cast hit.
+2. **Attach a swing.** A `SpringJoint` is added to the player, anchored to the selected world position.
+   Its distance limits, spring, damping, and mass scale determine the connection's behavior.
+3. **Apply movement.** Directional thrust and cable-length controls act on the Rigidbody. With both hooks active,
+   cable controls use the midpoint between their attachment positions.
+4. **Execute a grapple.** The player briefly freezes, then `CalculateJumpVelocity` computes vertical and horizontal
+   launch components from gravity, target displacement, and the desired arc height.
+5. **Resolve the state.** Collision handling and movement restrictions return control after grappling.
+   `LineRenderer` components draw the active connections.
+
+### Ring challenge
+
+`spawner.cs` resets the score at startup and fills the scene up to its configured ring cap once its initial
+`og` reference becomes null. `Rings.cs` destroys a ring on a trigger event and notifies the spawner to increment
+the score. `Timer.cs` updates the countdown text and displays the final score when time expires.
+
+The ring trigger currently accepts any entering collider; it does not check a player tag in that callback.
+Collider/layer setup therefore matters when validating the challenge.
+
+## Project map
+
+```text
+Spider/
+├── Assets/
+│   ├── DualSwinging.unity              Main enabled gameplay scene
+│   ├── PlayerMovementDualSwinging.cs   Rigidbody movement and grapple trajectory math
+│   ├── GrapplingDone.cs                Alternative single-grapple implementation
+│   ├── spawner.cs                      Ring spawning and score
+│   ├── Rings.cs                        Ring trigger and collection
+│   ├── Timer.cs                        Countdown and final-score display
+│   ├── Menu.cs                         Intro canvas dismissal
+│   ├── Ignore/Scripts/
+│   │   ├── VR INPUT.cs                 VR callbacks mapped to Windows input
+│   │   ├── PlayerCam.cs                Camera behavior
+│   │   └── Grappling/DualHooks.cs       Dual swing/grapple mechanics
+│   ├── Loco Our Scripts/               Platform and NPC helpers
+│   ├── Scenes/                        Additional scene content
+│   ├── Oculus/, XR/, XRI/              XR assets and configuration
+│   └── ...                            Environment, materials, prefabs and imported assets
+├── Packages/                          Unity package manifest and dependency configuration
+└── ProjectSettings/                   Editor version, build scenes and project settings
+```
+
+Despite its name, `Assets/Ignore/` contains scripts referenced by other gameplay code. Do not remove it solely
+because of the folder name.
+
+## Configuration and troubleshooting
+
+| Symptom or task | What to check |
+| --- | --- |
+| Hooks do not attach | Surface colliders, `whatIsGrappleable`, target indicators, and camera/aim transforms |
+| Missing ropes or hook errors | Both slots in `lineRenderers`, `gunTips`, `predictionPoints`, and `pointAimers` |
+| Movement input does not respond | Legacy input compatibility, Game view focus, and VR callback wiring |
+| Camera or movement null-reference errors | `pm`, `cam`, `orientation`, Rigidbody and UI assignments |
+| Rings or timer do not start | Spawner `og`, `enemyPrefab`, `spawnCap`, `timer`, and timer/ring references |
+| Android build fails around Windows input | The `WindowsInput` dependency and platform-specific input bridge |
+| Tune traversal feel | Spring settings in `StartSwing`; movement speed, thrust, grapple delay, overshoot and cooldown fields |
+
+Keep the dual-hook setup at two slots unless you also update the code: several methods explicitly access
+indices 0 and 1 even though `amountOfSwingPoints` is exposed.
+
+For movement changes, manually check one-hook and two-hook swinging, releasing either hook, grappling above
+and below the player, collision recovery, and ring collection. Start a fresh play session when checking ring
+spawning, because the spawn counter is static. This README update is based on source inspection; it does not
+claim a fresh Unity build or headset test.
+
+## Rights and project purpose
+
+This project is a non-commercial, free-to-play fan project created strictly for educational, learning, and
+portfolio purposes. The swinging mechanics are inspired by the Marvel universe. All rights to the original
+characters, names, and trademarked concepts belong to their respective owners. No copyright infringement is
+intended.
+
+Third-party models, environments, plugins, and other imported assets remain subject to their respective terms.
+This README does not grant redistribution or commercial-use rights to those assets.
